@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "QR App — Panel de Restaurante"
+version = "1.0.0"
+id = "artifacts/restaurant-panel"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 25746
+
+[services.development]
+run = "pnpm --filter @workspace/restaurant-panel run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/restaurant-panel", "run", "build" ]
+publicDir = "artifacts/restaurant-panel/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "25746"
+BASE_PATH = "/"

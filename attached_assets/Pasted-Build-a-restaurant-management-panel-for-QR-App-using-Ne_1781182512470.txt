@@ -1,0 +1,141 @@
+Build a restaurant management panel for "QR App" using Next.js with TypeScript. This is a web dashboard where restaurant owners, managers, kitchen staff, and waiters manage their operations. It connects to an existing backend API.
+
+TECH STACK:
+- Next.js 14+ (App Router)
+- TypeScript (strict)
+- Tailwind CSS for styling
+- Zustand for state management
+- Axios for API calls
+- Recharts for charts/statistics (install it)
+- React Hot Toast for notifications
+
+PROJECT STRUCTURE:
+/src/
+  app/
+    layout.tsx              → Root layout
+    login/page.tsx          → Employee login
+    (dashboard)/
+      layout.tsx            → Dashboard layout with sidebar
+      page.tsx              → Main dashboard
+      orders/page.tsx       → Order management
+      tables/page.tsx       → Table management
+      menu/page.tsx         → Menu management
+      reservations/page.tsx → Reservations
+      clients/page.tsx      → Client data
+      promotions/page.tsx   → Promotions & coupons
+      statistics/page.tsx   → Statistics & charts
+      employees/page.tsx    → Employee management
+      settings/page.tsx     → Branch configuration
+      alerts/page.tsx       → Alerts
+  components/
+    ui/                     → Reusable UI (Button, Input, Card, Modal, Table, Badge, etc.)
+    sidebar/Sidebar.tsx     → Navigation sidebar
+    dashboard/              → Dashboard widgets
+  services/
+    api.ts                  → Axios instance with auth
+    auth.ts                 → Employee auth API calls
+    dashboard.ts            → Dashboard API calls
+    orders.ts               → Orders API calls
+  stores/
+    authStore.ts            → Employee auth state (user, role, branchIds, activeBranch)
+  lib/
+    utils.ts                → Formatters, helpers
+  types/
+    index.ts                → TypeScript interfaces
+
+ENVIRONMENT VARIABLE:
+- NEXT_PUBLIC_API_BASE_URL → Backend URL
+
+DESIGN:
+- Sidebar: dark (#1E293B), width 260px, collapsible
+- Content area: light gray background (#F1F5F9)
+- Cards: white with subtle shadow
+- Primary action color: #FF6B35 (same as app)
+- Text: #1E293B (primary), #64748B (secondary)
+- Status colors: green (#22C55E), yellow (#EAB308), red (#EF4444), blue (#3B82F6)
+- Table rows: alternating white/#F8FAFC
+- Font: Inter (import from Google Fonts)
+- All text in Spanish
+
+SCREENS TO BUILD:
+
+1. LOGIN PAGE (login/page.tsx):
+- Centered card with logo placeholder and "Panel de Restaurante" title
+- Email + password fields
+- "Iniciar sesión" button
+- Calls POST /api/v1/auth/employee/login
+- On success: store token, employee data, role, branch_ids in Zustand + localStorage
+- If employee has multiple branches: show branch selector modal after login
+- Redirect to dashboard
+- Error handling in Spanish
+
+2. DASHBOARD LAYOUT ((dashboard)/layout.tsx):
+- Auth guard: redirect to login if no token
+- Sidebar on the left (collapsible on mobile)
+- Top bar: branch name, branch selector dropdown (if multi-branch), employee name, role badge, logout button
+- Content area on the right
+- Role-based sidebar items (show/hide based on role):
+  - Admin: all items visible
+  - Manager: tables, orders, reservations, alerts (no menu, stats, promotions, employees, settings)
+  - Kitchen: orders only
+  - Waiter: tables, orders, alerts
+
+3. SIDEBAR (components/sidebar/Sidebar.tsx):
+- Logo at top
+- Navigation items with icons:
+  - Dashboard (grid icon)
+  - Pedidos (receipt icon) — with real-time count badge of active orders
+  - Mesas (layout icon)
+  - Menú (utensils icon)
+  - Reservas (calendar icon)
+  - Clientes (users icon)
+  - Promociones (tag icon)
+  - Estadísticas (chart icon)
+  - Empleados (user-cog icon)
+  - Configuración (settings icon)
+  - Alertas (bell icon) — with pending count badge
+- Active item highlighted with primary color
+- Collapse to icons only on small screens
+- Role-based visibility
+
+4. MAIN DASHBOARD (page.tsx):
+- Calls GET /api/v1/panel/branches/:branchId/dashboard
+- Grid of stat cards (2 columns on mobile, 4 on desktop):
+  - "Mesas activas" with count and icon
+  - "Pedidos en curso" with count
+  - "Ingresos del día" formatted as Gs.
+  - "Pedidos completados" count
+  - "Reservas de hoy" count
+  - "Alertas pendientes" count
+- "Pedidos recientes" table below: last 5 orders with table number, status badge, total, time
+- Auto-refresh dashboard every 30 seconds
+- Loading skeletons while fetching
+
+5. KITCHEN VIEW (special route or mode):
+- When role is 'kitchen', the dashboard shows ONLY incoming orders
+- Large cards, optimized for tablet
+- Each order card: table number (large), items list with modifications/notes, time since received
+- "Listo" button per item, "Todo listo" button per order
+- Orders sorted by time (oldest first)
+- Real-time updates (poll every 5 seconds)
+- High contrast, large text
+
+AUTH STORE (stores/authStore.ts):
+- State: employee, token, role, branchIds, activeBranchId, isAuthenticated
+- Actions: login, logout, switchBranch, checkAuth
+- Persist to localStorage
+- On logout: clear everything, redirect to login
+
+API SERVICE (services/api.ts):
+- Axios instance with NEXT_PUBLIC_API_BASE_URL
+- Request interceptor: attach Bearer token
+- Response interceptor: on 401, logout and redirect to login
+
+RULES:
+- All text in Spanish
+- Responsive (works on desktop and tablet)
+- Kitchen view optimized for tablet touch interface
+- Use proper Next.js App Router patterns (server/client components)
+- Loading states on all data fetches
+- Role-based access control on every page
+- Format all prices as Guaraníes with dots (25.000 Gs.)
